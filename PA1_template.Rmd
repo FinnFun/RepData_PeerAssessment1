@@ -7,19 +7,105 @@ output:
 
 
 ## Loading and preprocessing the data
+load data from local csv file
+```{R, echo = TRUE}
+d1 <- read.csv('activity.csv', sep=',', header = TRUE)
+str(d1)
+```
+the data loaded has 3 variables including:
+- **steps**: Number of steps taking in a 5-minute interval
+- **date**: The date on which the measurement was taken in YYYY-MM-DD format
+- **interval**: Identifier for the 5-minute interval in which measurement was taken
 
-
+it has 17568 observations but some values missing，and the variable data need to be transform to Date type.
+```{R, echo = TRUE}
+d1$date <- as.Date(d1$date)
+```
 
 ## What is mean total number of steps taken per day?
 
+```{R, echo = TRUE}
+library(dplyr)
+sp <- group_by(d1, date)
+sp <- as.data.frame(summarize(sp, mean=mean(steps),median = median(steps), total=sum(steps)))
+sp
+```
+we've got **total,mean and median** of steps per day all in  data frame nameed **sp**,it has 61 rows
 
+let's maek a histogram of the total number of steps taken each day by ggplot2
+```{R, echo = TRUE}
+library(ggplot2)
+g <- ggplot(sp,aes(date,total))
+g + geom_histogram(stat = 'identity') 
+```
 
 ## What is the average daily activity pattern?
-
+calculate average steps of the 5-minute interval across all days then sort data by mean variable
+```{R, echo = TRUE}
+si <- group_by(d1, interval)
+si <- as.data.frame(summarize(si, mean=mean(steps, na.rm=TRUE),))
+si[order(si$mean, decreasing = TRUE),]
+```
+the  **835**th interval has the maximum number of steps, let's draw plot
+```{R, echo = TRUE}
+g2 <- ggplot(si,aes(interval,mean))
+g2 + geom_line() 
+```
 
 
 ## Imputing missing values
+check which variable has missing values
+```{R, echo = TRUE}
+sapply(d1,anyNA)
+```
+only steps has NAs
 
+find the number of rows which has missing values
+```{R, echo = TRUE}
+Nat <- sum(is.na(d1))
+Nat
+```
+the dataset has **2304** rows with missing value
 
+use the mean for that 5-minute interval to fill these NAs
+```{R, echo = TRUE}
+m <- merge(d1[is.na(d1),],si,by = 'interval')
+d2 <- d1[,]
+d2[is.na(d2),'steps'] <- m$mean
+head(d2[is.na(d1),],10)
+```
+now we've filled all missing values and saved to the new dataset **d2** then compare with the first part's results
+
+use **d2** calculate the mean, total and median as we do before
+```{R, echo = TRUE}
+sp2 <- group_by(d2, date)
+sp2 <- as.data.frame(summarize(sp2, mean=mean(steps),median = median(steps), total=sum(steps)))
+cp_sp <- merge(sp, sp2, by = 'date')
+##cp_sp <- cp_sp %>%  mutate(mean_comp = mean.y-mean.x, total_comp =  total.y-total.x, median_comp = median.y-median.x) %>% select(date, total_comp, median_comp, mean_comp)
+cp_sp
+```
+the median , mean and total are the **same** as the results of the first part 
+
+plot the total number of steps taken each day
+```{R, echo = TRUE}
+g <- ggplot(sp2,aes(date,total))
+g + geom_histogram(stat = 'identity') 
+```
 
 ## Are there differences in activity patterns between weekdays and weekends?
+make a new dataset **dw** which has week_cat variable that divide the data into "weekday" or "weekend"
+```{R, echo = TRUE}
+dw <- d2 %>% mutate(week_cat = factor(weekdays(date),
+                                levels = c('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'),
+                                labels = c('weekday','weekday','weekday','weekday','weekday','weekend','weekend')))
+dw[dw$week_cat=='weekday',]
+```
+Make a panel plot containing a time series plot  of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days
+```{R, echo = TRUE}
+si2 <- group_by(dw, interval, week_cat)
+si2 <- as.data.frame(summarize(si2, mean=mean(steps, na.rm=TRUE)))
+
+g3 <- ggplot(si2,aes(interval,mean))
+g3 + geom_line() + facet_grid(week_cat~.)
+```
+
