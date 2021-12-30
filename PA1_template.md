@@ -10,6 +10,7 @@ output:
 load data from local csv file
 
 ```r
+unzip('activity.zip')
 d1 <- read.csv('activity.csv', sep=',', header = TRUE)
 str(d1)
 ```
@@ -105,26 +106,28 @@ sp
 ## 60 2012-11-29 24.4687500      0  7047
 ## 61 2012-11-30         NA     NA    NA
 ```
-we've got **total,mean and median** of steps per day all in  data frame nameed **sp**,it has 61 rows
+we've got **total,mean and median** of steps per day all in  data frame named **sp**,it has 61 rows
 
 let's maek a histogram of the total number of steps taken each day by ggplot2
 
+
 ```r
 library(ggplot2)
-g <- ggplot(sp,aes(date,total))
-g + geom_histogram(stat = 'identity') 
+g <- ggplot(sp,aes(x= total))
+g + geom_histogram() + labs(x= 'Number of steps', 
+                            y = 'Frequency', 
+                            title= 'Histogram of the total number of steps taken each day')
 ```
 
 ```
-## Warning: Ignoring unknown parameters: binwidth, bins, pad
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 ```
 
 ```
-## Warning: Removed 8 rows containing missing values (position_stack).
+## Warning: Removed 8 rows containing non-finite values (stat_bin).
 ```
 
-![plot of chunk unnamed-chunk-126](figure/unnamed-chunk-126-1.png)
-
+![plot of chunk unnamed-chunk-20](figure/unnamed-chunk-20-1.png)
 ## What is the average daily activity pattern?
 calculate average steps of the 5-minute interval across all days then sort data by mean variable
 
@@ -429,10 +432,12 @@ the  **835**th interval has the maximum number of steps, let's draw plot
 
 ```r
 g2 <- ggplot(si,aes(interval,mean))
-g2 + geom_line() 
+g2 + geom_line() + labs(title = 'Average Daily Activity Pattern',
+                        x = '5-minute intervals',
+                        y = 'Avarage number of steps taken')
 ```
 
-![plot of chunk unnamed-chunk-128](figure/unnamed-chunk-128-1.png)
+![plot of chunk unnamed-chunk-22](figure/unnamed-chunk-22-1.png)
 
 
 ## Imputing missing values
@@ -563,15 +568,17 @@ the median , mean and total are the **same** as the results of the first part
 plot the total number of steps taken each day
 
 ```r
-g <- ggplot(sp2,aes(date,total))
-g + geom_histogram(stat = 'identity') 
+g3 <- ggplot(sp2,aes(x= total))
+g3 + geom_histogram() + labs(x= 'Number of steps', 
+                            y = 'Frequency', 
+                            title= 'Histogram of the total number of steps taken each day')
 ```
 
 ```
-## Warning: Ignoring unknown parameters: binwidth, bins, pad
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 ```
 
-![plot of chunk unnamed-chunk-133](figure/unnamed-chunk-133-1.png)
+![plot of chunk unnamed-chunk-27](figure/unnamed-chunk-27-1.png)
 
 ## Are there differences in activity patterns between weekdays and weekends?
 make a new dataset **dw** which has week_cat variable that divide the data into "weekday" or "weekend"
@@ -850,8 +857,10 @@ si2 <- as.data.frame(summarize(si2, mean=mean(steps, na.rm=TRUE)))
 
 ```r
 g3 <- ggplot(si2,aes(interval,mean))
-g3 + geom_line() + facet_grid(week_cat~.)
+g3 + geom_line() + facet_grid(week_cat~.) + labs(title = 'Activity patterns on weekdays and weekends',
+                                                 x = '5-minute intervals',
+                                                 y = 'Avarage number of steps taken')
 ```
 
-![plot of chunk unnamed-chunk-135](figure/unnamed-chunk-135-1.png)
+![plot of chunk unnamed-chunk-29](figure/unnamed-chunk-29-1.png)
 
