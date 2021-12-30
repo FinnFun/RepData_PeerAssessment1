@@ -31,15 +31,17 @@ sp <- group_by(d1, date)
 sp <- as.data.frame(summarize(sp, mean=mean(steps),median = median(steps), total=sum(steps)))
 sp
 ```
-we've got **total,mean and median** of steps per day all in  data frame nameed **sp**,it has 61 rows
+we've got **total,mean and median** of steps per day all in  data frame named **sp**,it has 61 rows
 
 let's maek a histogram of the total number of steps taken each day by ggplot2
+
 ```{R, echo = TRUE}
 library(ggplot2)
-g <- ggplot(sp,aes(date,total))
-g + geom_histogram(stat = 'identity') 
+g <- ggplot(sp,aes(x= total))
+g + geom_histogram() + labs(x= 'Number of steps', 
+                            y = 'Frequency', 
+                            title= 'Histogram of the total number of steps taken each day')
 ```
-
 ## What is the average daily activity pattern?
 calculate average steps of the 5-minute interval across all days then sort data by mean variable
 ```{R, echo = TRUE}
@@ -50,7 +52,9 @@ si[order(si$mean, decreasing = TRUE),]
 the  **835**th interval has the maximum number of steps, let's draw plot
 ```{R, echo = TRUE}
 g2 <- ggplot(si,aes(interval,mean))
-g2 + geom_line() 
+g2 + geom_line() + labs(title = 'Average Daily Activity Pattern',
+                        x = '5-minute intervals',
+                        y = 'Avarage number of steps taken')
 ```
 
 
@@ -89,8 +93,10 @@ the median , mean and total are the **same** as the results of the first part
 
 plot the total number of steps taken each day
 ```{R, echo = TRUE}
-g <- ggplot(sp2,aes(date,total))
-g + geom_histogram(stat = 'identity') 
+g3 <- ggplot(sp2,aes(x= total))
+g3 + geom_histogram() + labs(x= 'Number of steps', 
+                            y = 'Frequency', 
+                            title= 'Histogram of the total number of steps taken each day')
 ```
 
 ## Are there differences in activity patterns between weekdays and weekends?
@@ -107,6 +113,8 @@ si2 <- group_by(dw, interval, week_cat)
 si2 <- as.data.frame(summarize(si2, mean=mean(steps, na.rm=TRUE)))
 
 g3 <- ggplot(si2,aes(interval,mean))
-g3 + geom_line() + facet_grid(week_cat~.)
+g3 + geom_line() + facet_grid(week_cat~.) + labs(title = 'Activity patterns on weekdays and weekends',
+                                                 x = '5-minute intervals',
+                                                 y = 'Avarage number of steps taken')
 ```
 
