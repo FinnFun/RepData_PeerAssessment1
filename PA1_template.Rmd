@@ -9,6 +9,7 @@ output:
 ## Loading and preprocessing the data
 load data from local csv file
 ```{R, echo = TRUE}
+unzip('activity.zip')
 d1 <- read.csv('activity.csv', sep=',', header = TRUE)
 str(d1)
 ```
